@@ -15,6 +15,14 @@
         <typeHandler handler="handler.DateTypeHandler"/>
     </typeHandlers>
 
+    <!--    配置PageHelper插件-->
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageHelper">
+            <!--            指定方言-->
+            <property name="dialect" value="mysql"/>
+        </plugin>
+    </plugins>
+
     <!--    配置数据源的环境,可配置多个环境，将默认环境放进default字段中-->
     <environments default="development">
         <environment id="development">
