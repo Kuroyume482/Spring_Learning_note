@@ -2,14 +2,17 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="spring_demo" />
+        <module name="mybatis_Mapper" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="mybatis_Mapper" target="8" />
       <module name="spring_demo" target="1.8" />
     </bytecodeTargetLevel>
   </component>
