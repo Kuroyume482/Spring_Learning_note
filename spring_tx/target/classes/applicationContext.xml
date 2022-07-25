@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--    配置组件扫描,用于注解开发-->
+    <context:component-scan base-package="com.huahua"/>
+    <!--    自动代理-->
+    <aop:aspectj-autoproxy/>
+
+<!--    加载外部的properties文件-->
+    <context:property-placeholder location="classpath:application.properties"/>
+
+<!--    配置数据源对象-->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driver}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+<!--    jdbc模版对象-->
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+
+<!--    <bean id="accountDao" class="com.huahua.dao.impl.AccountDaoImpl" >-->
+<!--        <property name="jdbcTemplate" ref="jdbcTemplate"/>-->
+<!--    </bean>-->
+
+<!--    切点，目标对象-->
+<!--    <bean id="accountService" class="com.huahua.service.impl.AccountServiceImpl">-->
+<!--        <property name="accountDao" ref="accountDao"/>-->
+<!--    </bean>-->
+
+<!--    配置平台事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+<!--    事务的注解驱动-->
+<!--    <tx:annotation-driven transaction-manager="transactionManager"/>-->
+    
+<!--&lt;!&ndash;    通知  事务赠钱&ndash;&gt;-->
+<!--    <tx:advice id="txAdvice" transaction-manager="transactionManager">-->
+<!--&lt;!&ndash;        设置事务的属性信息&ndash;&gt;-->
+<!--        <tx:attributes>-->
+<!--&lt;!&ndash;  method:覆盖，指定的方法，isolation：隔离级别，propagation：传播行为，timeout：失效时间，read-only：是否只读，可配根据不同的方法，配置其不同的隔离级别等属性&ndash;&gt;-->
+<!--            <tx:method name="*"/>-->
+<!--        </tx:attributes>-->
+<!--    </tx:advice>-->
+
+<!--&lt;!&ndash;    配置Aop的事务织入&ndash;&gt;-->
+<!--    <aop:config>-->
+<!--        <aop:advisor advice-ref="txAdvice" pointcut="execution(* com.huahua.service.impl.*.*(..))"/>-->
+<!--    </aop:config>-->
+</beans>

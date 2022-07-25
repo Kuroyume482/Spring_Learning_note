@@ -9,6 +9,7 @@
         <option value="$PROJECT_DIR$/spring_demo/pom.xml" />
         <option value="$PROJECT_DIR$/mybatis_Mapper/pom.xml" />
         <option value="$PROJECT_DIR$/mybatis_config/pom.xml" />
+        <option value="$PROJECT_DIR$/spring_tx/pom.xml" />
       </list>
     </option>
   </component>
