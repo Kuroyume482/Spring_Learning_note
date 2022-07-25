@@ -1,5 +1,8 @@
 package com.huahua.domain;
 
+import org.springframework.stereotype.Component;
+
+//@Component
 public class Account {
 
     private String name;
