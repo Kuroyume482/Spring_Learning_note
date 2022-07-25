@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Spring_Learning_note.iml" filepath="$PROJECT_DIR$/Spring_Learning_note.iml" />
       <module fileurl="file://$PROJECT_DIR$/mybatis_Mapper/mybatis_Mapper.iml" filepath="$PROJECT_DIR$/mybatis_Mapper/mybatis_Mapper.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mybatis_anno/mybatis_anno.iml" filepath="$PROJECT_DIR$/mybatis_anno/mybatis_anno.iml" />
       <module fileurl="file://$PROJECT_DIR$/mybatis_config/mybatis_config.iml" filepath="$PROJECT_DIR$/mybatis_config/mybatis_config.iml" />
       <module fileurl="file://$PROJECT_DIR$/mybatis_dao/mybatis_dao.iml" filepath="$PROJECT_DIR$/mybatis_dao/mybatis_dao.iml" />
       <module fileurl="file://$PROJECT_DIR$/spring_demo/spring_demo.iml" filepath="$PROJECT_DIR$/spring_demo/spring_demo.iml" />

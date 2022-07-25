@@ -5567,4 +5567,416 @@ Order(id=2, orderTime=Wed Oct 10 15:00:00 CST 2018, total=5800.0, user=User(id=2
   User(id=308, username=user1, password=root1, birthday=Sun Jul 24 11:24:41 CST 2022, orderList=null, roleList=[Role(id=308, roleName=班主任, roleDesc=负责学生的日常)])
   ```
 
-  
+
+# 21、MyBatis注解开发
+
+## 1、MyBatis的常用注解
+
+这几年来注解开发越来越流行，Mybatis也可以使用注解开发方式，这样我们就可以减少编写Mapper 映射文件了。我们先围绕一些基本的CRUD来学习，再学习复杂映射多表操作。
+
+```
+@Insert:实现新增
+@Update:实现更新
+@Delete:实现删除
+@Select:实现查询
+@Result:实现结果集封装
+@Results:可以与@Result 一起使用，封装多个结果集 
+@One:实现一对一结果集封装 
+@Many:实现一对多结果集封装
+```
+
+## 2、MyBatis的增删改查
+
+我们完成简单的user表的增删改查的操作
+
+编写注释
+
+```java
+package dao;
+
+import domain.User;
+import org.apache.ibatis.annotations.*;
+
+import java.util.List;
+
+public interface UserMapper {
+    @Insert("insert into user values (#{id},#{username},#{password},#{birthday})")
+    public void save(User user);
+    @Update("update user set username=#{username},password=#{password},birthday=#{birthday} where id=#{id}")
+    public void update(User user);
+    @Delete("delete from user where id=#{id}")
+    public void delete(int id);
+    @Select("select * from user where id=#{id}")
+    public User findById(int id);
+    @Select("select * from user")
+    public List<User> findAll();
+}
+```
+
+加载映射关系，不加载映射文件
+
+```xml
+<!--    加载映射关系 TODO-->
+    <mappers>
+<!--        指定接口所在的包-->
+        <package name="dao"/>
+    </mappers>
+```
+
+测试：
+
+```java
+private UserMapper userMapper;
+private OrderMapper orderMapper;
+private SqlSession sqlSession;
+@SneakyThrows
+@Before
+public void before(){
+    InputStream resourceAsStream = Resources.getResourceAsStream("sqlMapConfig.xml");
+    SqlSessionFactory sessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
+    sqlSession = sessionFactory.openSession();
+    userMapper = sqlSession.getMapper(UserMapper.class);
+    orderMapper = sqlSession.getMapper(OrderMapper.class);
+}
+
+@After
+public void after(){
+    sqlSession.commit();
+    sqlSession.close();
+}
+
+@Test
+    public void testSave(){
+        User user = new User();
+        user.setUsername("asgvfadsfgv");
+        user.setPassword("asdf");
+        user.setBirthday(new Date());
+        userMapper.save(user);
+    }
+
+    @Test
+    public void testUpdate(){
+        User user = new User();
+        user.setId(321);
+        user.setUsername("asdfs");
+        user.setPassword("asdf");
+        user.setBirthday(new Date());
+        userMapper.update(user);
+    }
+
+    @Test
+    public void testDelete(){
+        userMapper.delete(321);
+    }
+
+    @Test
+    public void testSelect(){
+        System.out.println(userMapper.findById(318));
+    }
+
+    @Test
+    public void testFindAll(){
+        userMapper.findAll().forEach(user -> {
+            System.out.println(user);
+        });
+    }
+}
+```
+
+结果略
+
+## 3、一对一注解查询配置
+
+
+
+### 两种注解配置
+
+```java
+package dao;
+
+import domain.Order;
+import domain.User;
+import org.apache.ibatis.annotations.One;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
+
+public interface OrderMapper {
+
+    //两张表一起查
+    @Select("select *,o.id oid from tb_order o,user u where o.uid=u.id")
+    @Results({
+            @Result(column = "id",property = "id"),
+            @Result(column = "ordertime",property = "ordertime"),
+            @Result(column = "total",property = "total"),
+            @Result(column = "total",property = "total"),
+            @Result(column = "uid",property = "user.id"),
+            @Result(column = "username",property = "user.username"),
+            @Result(column = "password",property = "user.password"),
+            @Result(column = "birthday",property = "user.birthday"),
+    })
+    public List<Order> findAll1();
+
+//    分开查询
+    @Select("select * from tb_order")
+        @Results({
+            @Result(column = "id",property = "id"),
+            @Result(column = "ordertime",property = "ordertime"),
+            @Result(column = "total",property = "total"),
+            @Result(column = "total",property = "total"),
+            @Result(
+                javaType = User.class, //要封装的实体类型
+                property = "user" ,  //要封装的属性名称
+                column =  "uid", //根据哪个字段去查询User表内容
+                one = @One(select = "dao.UserMapper.findById")
+            )
+    })
+    public List<Order> findAll2();
+}
+```
+
+### 测试
+
+在上述测试方法中添加
+
+```java
+@Test
+public void testOrderFindAll(){
+    orderMapper.findAll1().forEach(order -> {
+        System.out.println(order);
+    });
+    orderMapper.findAll2().forEach(order -> {
+        System.out.println(order);
+    });
+}
+```
+
+### 结果：
+
+```apl
+17:14:27,518 DEBUG JdbcTransaction:101 - Setting autocommit to false on JDBC Connection [com.mysql.cj.jdbc.ConnectionImpl@1aafa419]
+17:14:27,523 DEBUG findAll1:137 - ==>  Preparing: select *,o.id oid from tb_order o,user u where o.uid=u.id
+17:14:27,566 DEBUG findAll1:137 - ==> Parameters: 
+17:14:27,598 DEBUG findAll1:137 - <==      Total: 3
+Order(id=1, ordertime=Fri Feb 15 14:59:37 CST 2019, total=3000.0, user=User(id=305, username=tom, password=asfd, birthday=Sun Jul 24 10:47:57 CST 2022, orderList=null, roleList=null))
+Order(id=2, ordertime=Wed Oct 10 15:00:00 CST 2018, total=5800.0, user=User(id=305, username=tom, password=asfd, birthday=Sun Jul 24 10:47:57 CST 2022, orderList=null, roleList=null))
+Order(id=3, ordertime=Mon Jan 01 12:12:12 CST 2018, total=200.0, user=User(id=306, username=huahua, password=root, birthday=Sun Jul 24 10:58:13 CST 2022, orderList=null, roleList=null))
+17:14:27,601 DEBUG findAll2:137 - ==>  Preparing: select * from tb_order
+17:14:27,601 DEBUG findAll2:137 - ==> Parameters: 
+17:14:27,605 DEBUG findById:137 - ====>  Preparing: select * from user where id=?
+17:14:27,605 DEBUG findById:137 - ====> Parameters: 305(Integer)
+17:14:27,607 DEBUG findById:137 - <====      Total: 1
+17:14:27,609 DEBUG findById:137 - ====>  Preparing: select * from user where id=?
+17:14:27,609 DEBUG findById:137 - ====> Parameters: 306(Integer)
+17:14:27,611 DEBUG findById:137 - <====      Total: 1
+17:14:27,611 DEBUG findAll2:137 - <==      Total: 3
+Order(id=1, ordertime=Fri Feb 15 14:59:37 CST 2019, total=3000.0, user=User(id=305, username=tom, password=asfd, birthday=Sun Jul 24 10:47:57 CST 2022, orderList=null, roleList=null))
+Order(id=2, ordertime=Wed Oct 10 15:00:00 CST 2018, total=5800.0, user=User(id=305, username=tom, password=asfd, birthday=Sun Jul 24 10:47:57 CST 2022, orderList=null, roleList=null))
+Order(id=3, ordertime=Mon Jan 01 12:12:12 CST 2018, total=200.0, user=User(id=306, username=huahua, password=root, birthday=Sun Jul 24 10:58:13 CST 2022, orderList=null, roleList=null))
+
+```
+
+## 4、一对多查询注解配置
+
+### 配置：
+
+先查询user表，在通过id作为外键查询order表
+
+```java
+@Select("select * from user")
+@Results({
+        @Result(id = true,column = "id",property = "id"),
+        @Result(column = "username",property = "username"),
+        @Result(column = "password",property = "password"),
+        @Result(column = "birthday",property = "birthday"),
+        @Result(
+                property = "orderList",
+                column = "id",
+                javaType = List.class,
+                many = @Many(select = "dao.OrderMapper.findByUid")
+        )
+})
+public List<User> findAllUserAndOrderList();
+
+```
+
+```java
+@Select("select * from tb_order where uid=#{uid}")
+public List<Order> findByUid();
+```
+
+### 测试：
+
+```java
+@Test
+public void testOneToMany(){
+    userMapper.findAllUserAndOrderList().forEach(user -> {
+        System.out.println(user);
+    });
+}
+```
+
+结果：
+
+```apl
+17:33:16,182 DEBUG findAllUserAndOrderList:137 - ==>  Preparing: select * from user
+17:33:16,215 DEBUG findAllUserAndOrderList:137 - ==> Parameters: 
+17:33:16,241 DEBUG findByUid:137 - ====>  Preparing: select * from tb_order where uid=?
+17:33:16,242 DEBUG findByUid:137 - ====> Parameters: 305(Integer)
+17:33:16,252 DEBUG findByUid:137 - <====      Total: 2
+17:33:16,255 DEBUG findByUid:137 - ====>  Preparing: select * from tb_order where uid=?
+17:33:16,255 DEBUG findByUid:137 - ====> Parameters: 306(Integer)
+17:33:16,257 DEBUG findByUid:137 - <====      Total: 1
+17:33:16,257 DEBUG findByUid:137 - ====>  Preparing: select * from tb_order where uid=?
+17:33:16,258 DEBUG findByUid:137 - ====> Parameters: 307(Integer)
+17:33:16,259 DEBUG findByUid:137 - <====      Total: 0
+17:33:16,259 DEBUG findByUid:137 - ====>  Preparing: select * from tb_order where uid=?
+17:33:16,259 DEBUG findByUid:137 - ====> Parameters: 308(Integer)
+17:33:16,260 DEBUG findByUid:137 - <====      Total: 0
+17:33:16,261 DEBUG findByUid:137 - ====>  Preparing: select * from tb_order where uid=?
+17:33:16,261 DEBUG findByUid:137 - ====> Parameters: 309(Integer)
+17:33:16,262 DEBUG findByUid:137 - <====      Total: 0
+17:33:16,263 DEBUG findByUid:137 - ====>  Preparing: select * from tb_order where uid=?
+17:33:16,263 DEBUG findByUid:137 - ====> Parameters: 310(Integer)
+17:33:16,264 DEBUG findByUid:137 - <====      Total: 0
+17:33:16,266 DEBUG findByUid:137 - ====>  Preparing: select * from tb_order where uid=?
+17:33:16,267 DEBUG findByUid:137 - ====> Parameters: 311(Integer)
+17:33:16,268 DEBUG findByUid:137 - <====      Total: 0
+17:33:16,268 DEBUG findByUid:137 - ====>  Preparing: select * from tb_order where uid=?
+17:33:16,269 DEBUG findByUid:137 - ====> Parameters: 312(Integer)
+17:33:16,270 DEBUG findByUid:137 - <====      Total: 0
+17:33:16,270 DEBUG findByUid:137 - ====>  Preparing: select * from tb_order where uid=?
+17:33:16,271 DEBUG findByUid:137 - ====> Parameters: 313(Integer)
+17:33:16,272 DEBUG findByUid:137 - <====      Total: 0
+17:33:16,273 DEBUG findByUid:137 - ====>  Preparing: select * from tb_order where uid=?
+17:33:16,273 DEBUG findByUid:137 - ====> Parameters: 314(Integer)
+17:33:16,275 DEBUG findByUid:137 - <====      Total: 0
+17:33:16,275 DEBUG findByUid:137 - ====>  Preparing: select * from tb_order where uid=?
+17:33:16,276 DEBUG findByUid:137 - ====> Parameters: 315(Integer)
+17:33:16,277 DEBUG findByUid:137 - <====      Total: 0
+17:33:16,278 DEBUG findByUid:137 - ====>  Preparing: select * from tb_order where uid=?
+17:33:16,278 DEBUG findByUid:137 - ====> Parameters: 316(Integer)
+17:33:16,280 DEBUG findByUid:137 - <====      Total: 0
+17:33:16,280 DEBUG findByUid:137 - ====>  Preparing: select * from tb_order where uid=?
+17:33:16,281 DEBUG findByUid:137 - ====> Parameters: 318(Integer)
+17:33:16,282 DEBUG findByUid:137 - <====      Total: 0
+17:33:16,282 DEBUG findAllUserAndOrderList:137 - <==      Total: 13
+User(id=305, username=tom, password=asfd, birthday=Sun Jul 24 10:47:57 CST 2022, orderList=[Order(id=1, ordertime=Fri Feb 15 14:59:37 CST 2019, total=3000.0, user=null), Order(id=2, ordertime=Wed Oct 10 15:00:00 CST 2018, total=5800.0, user=null)], roleList=null)
+User(id=306, username=huahua, password=root, birthday=Sun Jul 24 10:58:13 CST 2022, orderList=[Order(id=3, ordertime=Mon Jan 01 12:12:12 CST 2018, total=200.0, user=null)], roleList=null)
+User(id=307, username=user0, password=root0, birthday=Sun Jul 24 11:24:38 CST 2022, orderList=[], roleList=null)
+User(id=308, username=user1, password=root1, birthday=Sun Jul 24 11:24:41 CST 2022, orderList=[], roleList=null)
+User(id=309, username=user2, password=root2, birthday=Sun Jul 24 11:24:43 CST 2022, orderList=[], roleList=null)
+User(id=310, username=user3, password=root3, birthday=Sun Jul 24 11:24:45 CST 2022, orderList=[], roleList=null)
+User(id=311, username=user4, password=root4, birthday=Sun Jul 24 11:24:47 CST 2022, orderList=[], roleList=null)
+User(id=312, username=user5, password=root5, birthday=Sun Jul 24 11:24:49 CST 2022, orderList=[], roleList=null)
+User(id=313, username=user6, password=root6, birthday=Sun Jul 24 11:24:51 CST 2022, orderList=[], roleList=null)
+User(id=314, username=user7, password=root7, birthday=Sun Jul 24 11:24:53 CST 2022, orderList=[], roleList=null)
+User(id=315, username=user8, password=root8, birthday=Sun Jul 24 11:24:55 CST 2022, orderList=[], roleList=null)
+User(id=316, username=user9, password=root9, birthday=Sun Jul 24 11:24:57 CST 2022, orderList=[], roleList=null)
+User(id=318, username=hahah, password=asdf, birthday=Mon Jul 25 15:56:07 CST 2022, orderList=[], roleList=null)
+```
+
+## 5、多对多查询注解配置
+
+### 配置：
+
+```java
+//    select u.*,r.*,r.id rid from user u left join sys_user_role ur on u.id=ur.userId inner join sys_role r on ur.roleId=r.id;
+    @Select("select * from user")
+    @Results({
+            @Result(id = true,column = "id",property = "id"),
+            @Result(column = "username",property = "username"),
+            @Result(column = "password",property = "password"),
+            @Result(column = "birthday",property = "birthday"),
+//            @Result(
+//                    many = @Many(resultMap = )
+//            )
+            @Result(
+                    property = "roleList",
+                    column = "id",
+                    javaType = List.class,
+                    many = @Many(select = "dao.UserMapper.findById")
+            )
+    })
+    public List<User> findUserAndRoleAll();
+
+    @Select("SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=#{uid}")
+    public List<Role> findByUid(int uid);
+```
+
+### 测试：
+
+```java
+@Test
+public void testManyToMany(){
+    userMapper.findUserAndRoleAll().forEach(user -> {
+        System.out.println(user);
+    });
+}
+```
+
+### 结果：
+
+```apl
+18:10:54,267 DEBUG findUserAndRoleAll:137 - ==>  Preparing: select * from user
+18:10:54,302 DEBUG findUserAndRoleAll:137 - ==> Parameters: 
+18:10:54,324 DEBUG findByUid:137 - ====>  Preparing: SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=?
+18:10:54,325 DEBUG findByUid:137 - ====> Parameters: 305(Integer)
+18:10:54,328 DEBUG findByUid:137 - <====      Total: 3
+18:10:54,337 DEBUG findByUid:137 - ====>  Preparing: SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=?
+18:10:54,338 DEBUG findByUid:137 - ====> Parameters: 306(Integer)
+18:10:54,339 DEBUG findByUid:137 - <====      Total: 1
+18:10:54,339 DEBUG findByUid:137 - ====>  Preparing: SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=?
+18:10:54,340 DEBUG findByUid:137 - ====> Parameters: 307(Integer)
+18:10:54,341 DEBUG findByUid:137 - <====      Total: 1
+18:10:54,342 DEBUG findByUid:137 - ====>  Preparing: SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=?
+18:10:54,342 DEBUG findByUid:137 - ====> Parameters: 308(Integer)
+18:10:54,344 DEBUG findByUid:137 - <====      Total: 2
+18:10:54,345 DEBUG findByUid:137 - ====>  Preparing: SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=?
+18:10:54,345 DEBUG findByUid:137 - ====> Parameters: 309(Integer)
+18:10:54,347 DEBUG findByUid:137 - <====      Total: 1
+18:10:54,347 DEBUG findByUid:137 - ====>  Preparing: SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=?
+18:10:54,347 DEBUG findByUid:137 - ====> Parameters: 310(Integer)
+18:10:54,349 DEBUG findByUid:137 - <====      Total: 0
+18:10:54,349 DEBUG findByUid:137 - ====>  Preparing: SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=?
+18:10:54,350 DEBUG findByUid:137 - ====> Parameters: 311(Integer)
+18:10:54,352 DEBUG findByUid:137 - <====      Total: 0
+18:10:54,352 DEBUG findByUid:137 - ====>  Preparing: SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=?
+18:10:54,353 DEBUG findByUid:137 - ====> Parameters: 312(Integer)
+18:10:54,354 DEBUG findByUid:137 - <====      Total: 0
+18:10:54,355 DEBUG findByUid:137 - ====>  Preparing: SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=?
+18:10:54,355 DEBUG findByUid:137 - ====> Parameters: 313(Integer)
+18:10:54,357 DEBUG findByUid:137 - <====      Total: 0
+18:10:54,357 DEBUG findByUid:137 - ====>  Preparing: SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=?
+18:10:54,358 DEBUG findByUid:137 - ====> Parameters: 314(Integer)
+18:10:54,359 DEBUG findByUid:137 - <====      Total: 0
+18:10:54,360 DEBUG findByUid:137 - ====>  Preparing: SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=?
+18:10:54,360 DEBUG findByUid:137 - ====> Parameters: 315(Integer)
+18:10:54,363 DEBUG findByUid:137 - <====      Total: 0
+18:10:54,364 DEBUG findByUid:137 - ====>  Preparing: SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=?
+18:10:54,365 DEBUG findByUid:137 - ====> Parameters: 316(Integer)
+18:10:54,366 DEBUG findByUid:137 - <====      Total: 0
+18:10:54,366 DEBUG findByUid:137 - ====>  Preparing: SELECT * FROM sys_user_role ur,sys_role r WHERE ur.roleId=r.id AND ur.userId=?
+18:10:54,367 DEBUG findByUid:137 - ====> Parameters: 318(Integer)
+18:10:54,368 DEBUG findByUid:137 - <====      Total: 0
+18:10:54,368 DEBUG findUserAndRoleAll:137 - <==      Total: 13
+User(id=305, username=tom, password=asfd, birthday=Sun Jul 24 10:47:57 CST 2022, orderList=null, roleList=[Role(id=1, roleName=院长, roleDesc=负责全面工作), Role(id=2, roleName=研究员, roleDesc=课程研发工作), Role(id=3, roleName=讲师, roleDesc=授课工作)])
+User(id=306, username=huahua, password=root, birthday=Sun Jul 24 10:58:13 CST 2022, orderList=null, roleList=[Role(id=4, roleName=助教, roleDesc=协助解决学生的问题)])
+User(id=307, username=user0, password=root0, birthday=Sun Jul 24 11:24:38 CST 2022, orderList=null, roleList=[Role(id=5, roleName=班主任, roleDesc=负责学生的日常)])
+User(id=308, username=user1, password=root1, birthday=Sun Jul 24 11:24:41 CST 2022, orderList=null, roleList=[Role(id=5, roleName=班主任, roleDesc=负责学生的日常), Role(id=6, roleName=就业指导, roleDesc=负责学生的就业工作)])
+User(id=309, username=user2, password=root2, birthday=Sun Jul 24 11:24:43 CST 2022, orderList=null, roleList=[Role(id=1, roleName=院长, roleDesc=负责全面工作)])
+User(id=310, username=user3, password=root3, birthday=Sun Jul 24 11:24:45 CST 2022, orderList=null, roleList=[])
+User(id=311, username=user4, password=root4, birthday=Sun Jul 24 11:24:47 CST 2022, orderList=null, roleList=[])
+User(id=312, username=user5, password=root5, birthday=Sun Jul 24 11:24:49 CST 2022, orderList=null, roleList=[])
+User(id=313, username=user6, password=root6, birthday=Sun Jul 24 11:24:51 CST 2022, orderList=null, roleList=[])
+User(id=314, username=user7, password=root7, birthday=Sun Jul 24 11:24:53 CST 2022, orderList=null, roleList=[])
+User(id=315, username=user8, password=root8, birthday=Sun Jul 24 11:24:55 CST 2022, orderList=null, roleList=[])
+User(id=316, username=user9, password=root9, birthday=Sun Jul 24 11:24:57 CST 2022, orderList=null, roleList=[])
+User(id=318, username=hahah, password=asdf, birthday=Mon Jul 25 15:56:07 CST 2022, orderList=null, roleList=[])
+```
+
+# 22、SSM框架整合
+
+## 1、准备工作

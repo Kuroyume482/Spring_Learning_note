@@ -8,12 +8,14 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="spring_demo" />
+        <module name="mybatis_anno" />
         <module name="mybatis_dao" />
         <module name="mybatis_Mapper" />
         <module name="mybatis_config" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="mybatis_anno" target="8" />
       <module name="mybatis_config" target="8" />
       <module name="mybatis_dao" target="8" />
       <module name="mybatis_Mapper" target="8" />

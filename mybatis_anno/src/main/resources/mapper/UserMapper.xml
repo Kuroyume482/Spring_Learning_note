@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.UserMapper">
+    <!--    sql语句的抽取-->
+    <sql id="selectUser">select * from user</sql>
+
+    <insert id="save" parameterType="user">
+        insert into user values (#{id},#{username},#{password},#{birthday})
+    </insert>
+    <update id="update" parameterType="user">
+        update user set username=#{username},password=#{password},birthday=#{birthday} where id=#{id}
+    </update>
+    <!--    java.lang.Integer int-->
+    <delete id="delete" parameterType="int">
+        delete from user where id=#{id}
+    </delete>
+
+    <select id="findById" parameterType="int" resultType="user">
+        select * from user where id=#{id}
+    </select>
+
+    <select id="findAll" resultType="user">
+        select * from user
+    </select>
+
+
+    <select id="findByCondition" resultType="user" parameterType="user">
+        <include refid="selectUser"></include>
+        <where>
+            <if test="id!=null">
+                and id=#{id}
+            </if>
+            <if test="username!=null">
+                and username=#{username}
+            </if>
+            <if test="password!=null">
+                and password=#{password}
+            </if>
+        </where>
+    </select>
+<!--   传入为链表集合，list，传入为数组array，open拼接头，close拼接尾部，item接收collection的像，separator:item的分隔符-->
+    <select id="findByIds" parameterType="list" resultType="user">
+        <include refid="selectUser"></include>
+        <where>
+            <foreach collection="list" open="id in(" close=")" item="id" separator=",">
+                #{id}
+            </foreach>
+        </where>
+    </select>
+    <resultMap id="userAndOrderMap" type="user">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="birthday" property="birthday"/>
+<!--        配置集合,property：集合名称，ofType集合封装的类型-->
+        <collection property="orderList" ofType="order">
+            <id column="oid" property="id"/>
+            <result column="ordertime" property="orderTime"/>
+            <result column="total" property="total"/>
+        </collection>
+    </resultMap>
+    <select id="findAllUserAndOrderList" resultMap="userAndOrderMap">
+        select *,o.id oid from user u left join tb_order o on u.id=o.uid;
+    </select>
+
+    <resultMap id="userAndRole" type="user">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="birthday" property="birthday"/>
+        <collection property="roleList" ofType="role">
+            <id column="id" property="id"/>
+            <result column="roleName" property="roleName"/>
+            <result column="roleDesc" property="roleDesc"/>
+        </collection>
+    </resultMap>
+    <select id="findUserAndRoleAll" resultMap="userAndRole">
+        select u.*,r.*,r.id rid from user u left join sys_user_role ur on u.id=ur.userId inner join sys_role r on ur.roleId=r.id;
+    </select>
+</mapper>
