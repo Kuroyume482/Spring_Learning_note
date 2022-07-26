@@ -1,4 +1,4 @@
-package com.Huahua;
+package com.huahua;
 
 
 import com.huahua.config.SpringConfiguration;

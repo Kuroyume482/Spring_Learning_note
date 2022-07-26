@@ -775,18 +775,18 @@ Spring原始注解主要替代Bean的配置
 1. 添加组件扫描以寻找所有的注解
 
    ```xml
-       <context:component-scan base-package="com.Huahua"></context:component-scan>
+       <context:component-scan base-package="com.huahua"></context:component-scan>
    ```
 
 2. 将配置标签替换为实例化Bean的注解
 
    ```java
-   package com.Huahua.dao.Impl;
+   package com.huahua.dao.Impl;
    
-   import com.Huahua.dao.UserDao;
+   import com.huahua.dao.UserDao;
    import org.springframework.stereotype.Component;
    
-   // <bean id="userDao" class="com.Huahua.dao.Impl.UserDaoImpl"></bean>
+   // <bean id="userDao" class="com.huahua.dao.Impl.UserDaoImpl"></bean>
    @Component("userDao")
    public class UserDaoImpl implements UserDao {
        @Override
@@ -799,15 +799,15 @@ Spring原始注解主要替代Bean的配置
 3. 给需要注入的数据配置自动装配注解
 
    ```java
-   package com.Huahua.service.Impl;
+   package com.huahua.service.Impl;
    
-   import com.Huahua.dao.UserDao;
-   import com.Huahua.service.UserService;
+   import com.huahua.dao.UserDao;
+   import com.huahua.service.UserService;
    import org.springframework.beans.factory.annotation.Autowired;
    import org.springframework.beans.factory.annotation.Qualifier;
    import org.springframework.stereotype.Component;
    
-   //<bean id="userService" class="com.Huahua.service.Impl.UserServiceImpl">
+   //<bean id="userService" class="com.huahua.service.Impl.UserServiceImpl">
    @Component("userService")
    public class UserServiceImpl implements UserService {
        //<property name="userDao" ref="userDao"></property>
@@ -828,12 +828,12 @@ Spring原始注解主要替代Bean的配置
 4. 将上面的注解替换为衍生注解
 
    ```java
-   package com.Huahua.dao.Impl;
+   package com.huahua.dao.Impl;
    
-   import com.Huahua.dao.UserDao;
+   import com.huahua.dao.UserDao;
    import org.springframework.stereotype.Repository;
    
-   // <bean id="userDao" class="com.Huahua.dao.Impl.UserDaoImpl"></bean>
+   // <bean id="userDao" class="com.huahua.dao.Impl.UserDaoImpl"></bean>
    //@Component("userDao")
    @Repository("userDao")
    public class UserDaoImpl implements UserDao {
@@ -845,15 +845,15 @@ Spring原始注解主要替代Bean的配置
    ```
 
    ```java
-   package com.Huahua.service.Impl;
+   package com.huahua.service.Impl;
    
-   import com.Huahua.dao.UserDao;
-   import com.Huahua.service.UserService;
+   import com.huahua.dao.UserDao;
+   import com.huahua.service.UserService;
    import org.springframework.stereotype.Service;
    
    import javax.annotation.Resource;
    
-   //<bean id="userService" class="com.Huahua.service.Impl.UserServiceImpl">
+   //<bean id="userService" class="com.huahua.service.Impl.UserServiceImpl">
    //@Component("userService")
    @Service("userService")
    public class UserServiceImpl implements UserService {
@@ -876,23 +876,24 @@ Spring原始注解主要替代Bean的配置
 ### 3.1.2 普通类型注入
 
 ```java
-package com.Huahua.dao.Impl;
+package com.huahua.dao.Impl;
 
-import com.Huahua.dao.UserDao;
+import com.huahua.dao.UserDao;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-// <bean id="userDao" class="com.Huahua.dao.Impl.UserDaoImpl"></bean>
+// <bean id="userDao" class="com.huahua.dao.Impl.UserDaoImpl"></bean>
 //@Component("userDao")
 @Repository("userDao")
 public class UserDaoImpl implements UserDao {
-    @Value("${jdbc.driver}")
-    private String driver;
-    @Override
-    public void save() {
-        System.out.println(driver);
-        System.out.println("UserDaoImpl.save running ...");
-    }
+   @Value("${jdbc.driver}")
+   private String driver;
+
+   @Override
+   public void save() {
+      System.out.println(driver);
+      System.out.println("UserDaoImpl.save running ...");
+   }
 }
 ```
 
@@ -910,10 +911,10 @@ UserDaoImpl.save running ...
 ### 3.1.3 @Scope注解、初始化、销毁
 
 ```java
-package com.Huahua.service.Impl;
+package com.huahua.service.Impl;
 
-import com.Huahua.dao.UserDao;
-import com.Huahua.service.UserService;
+import com.huahua.dao.UserDao;
+import com.huahua.service.UserService;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -925,43 +926,44 @@ import javax.annotation.Resource;
 @Scope("singleton")
 //@Scope("prototype")
 public class UserServiceImpl implements UserService {
-    @Resource(name = "userDao")
-    private UserDao userDao;
-    @Override
-    public void save() {
-        userDao.save();
-    }
+   @Resource(name = "userDao")
+   private UserDao userDao;
 
-    public void setUserDao(UserDao userDao) {
-        this.userDao = userDao;
-    }
+   @Override
+   public void save() {
+      userDao.save();
+   }
 
-    @PostConstruct
-    public void init(){
-        System.out.println("init");
-    }
+   public void setUserDao(UserDao userDao) {
+      this.userDao = userDao;
+   }
 
-    @PreDestroy
-    public void destroy(){
-        System.out.println("destroy");
-    }
+   @PostConstruct
+   public void init() {
+      System.out.println("init");
+   }
+
+   @PreDestroy
+   public void destroy() {
+      System.out.println("destroy");
+   }
 }
 
 ```
 
 ```java
-package com.Huahua.web;
+package com.huahua.web;
 
-import com.Huahua.service.UserService;
+import com.huahua.service.UserService;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class UserController {
-    public static void main(String[] args) {
-        ClassPathXmlApplicationContext app = new ClassPathXmlApplicationContext("applicationContext.xml");
-        UserService userService  = app.getBean(UserService.class);
-        userService.save();
-        app.close();
-    }
+   public static void main(String[] args) {
+      ClassPathXmlApplicationContext app = new ClassPathXmlApplicationContext("applicationContext.xml");
+      UserService userService = app.getBean(UserService.class);
+      userService.save();
+      app.close();
+   }
 }
 ```
 
@@ -986,7 +988,7 @@ destroy
 |      注解       |                             说明                             |
 | :-------------: | :----------------------------------------------------------: |
 | @Configuration  | 用于指定当前类是一个Spring配置类，当创建容器时会从该类上加载注解 |
-| @ComponentScan  | 用于指定Spring在初始化容器时要扫描的包。作用和在Spring的xml配置文件中的<context:component-scan base-package="com.Huahua"><</context:component-scan>>一样 |
+| @ComponentScan  | 用于指定Spring在初始化容器时要扫描的包。作用和在Spring的xml配置文件中的<context:component-scan base-package="com.huahua"><</context:component-scan>>一样 |
 |      @Bean      |     使用在方法上，标注将该方法的返回值存储到Spring容器中     |
 | @PropertySource |                用于加载properties文件中的配置                |
 |     @Import     |                      用于导入其他配置类                      |
@@ -998,7 +1000,7 @@ destroy
    替换配置文件加载和数据源加载
 
    ```java
-   package com.Huahua.config;
+   package com.huahua.config;
    
    import com.mchange.v2.c3p0.ComboPooledDataSource;
    import org.springframework.beans.factory.annotation.Value;
@@ -1046,7 +1048,7 @@ destroy
    导入其他配置
 
    ```java
-   package com.Huahua.config;
+   package com.huahua.config;
    
    import org.springframework.context.annotation.ComponentScan;
    import org.springframework.context.annotation.Configuration;
@@ -1054,8 +1056,8 @@ destroy
    
    //标志该类时Spring的核心配置类
    @Configuration
-   //组件扫描    <context:component-scan base-package="com.Huahua"></context:component-scan>
-   @ComponentScan("com.Huahua")
+   //组件扫描    <context:component-scan base-package="com.huahua"></context:component-scan>
+   @ComponentScan("com.huahua")
    //<import resource>
    @Import({DataSourceConfiguration.class})
    public class SpringConfiguration {
@@ -1066,10 +1068,10 @@ destroy
 3. 测试类配置
 
    ```java
-   package com.Huahua.web;
+   package com.huahua.web;
    
-   import com.Huahua.config.SpringConfiguration;
-   import com.Huahua.service.UserService;
+   import com.huahua.config.SpringConfiguration;
+   import com.huahua.service.UserService;
    import org.springframework.context.annotation.AnnotationConfigApplicationContext;
    
    public class UserController {
@@ -1118,10 +1120,10 @@ destroy
 ### 4.1.4 创建测试方法进行测试
 
 ```java
-package com.Huahua;
+package com.huahua;
 
-import com.Huahua.config.SpringConfiguration;
-import com.Huahua.service.UserService;
+import com.huahua.config.SpringConfiguration;
+import com.huahua.service.UserService;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -1135,17 +1137,17 @@ import java.sql.SQLException;
 //@ContextConfiguration("classpath:applicationContext.xml")
 @ContextConfiguration(classes = {SpringConfiguration.class})
 public class SpringJunitTestCase {
-    @Autowired
-    private UserService userService;
+   @Autowired
+   private UserService userService;
 
-    @Autowired
-    private ComboPooledDataSource dataSources;
+   @Autowired
+   private ComboPooledDataSource dataSources;
 
-    @Test
-    public void test1() throws SQLException {
-        userService.save();
-        System.out.println(dataSources.getConnection());
-    }
+   @Test
+   public void test1() throws SQLException {
+      userService.save();
+      System.out.println(dataSources.getConnection());
+   }
 }
 ```
 
@@ -1238,9 +1240,9 @@ public class SpringJunitTestCase {
 6. 写HttpServlet类
 
    ```java
-   package com.Huahua.web;
+   package com.huahua.web;
    
-   import com.Huahua.service.UserService;
+   import com.huahua.service.UserService;
    import org.springframework.context.ApplicationContext;
    import org.springframework.context.support.ClassPathXmlApplicationContext;
    
@@ -1263,7 +1265,7 @@ public class SpringJunitTestCase {
    ```xml
    <servlet>
        <servlet-name>UserServlet</servlet-name>
-       <servlet-class>com.Huahua.web.UserServlet</servlet-class>
+       <servlet-class>com.huahua.web.UserServlet</servlet-class>
    </servlet>
    <servlet-mapping>
        <servlet-name>UserServlet</servlet-name>
@@ -1306,38 +1308,38 @@ public class SpringJunitTestCase {
 2.  创建应用程序上下文监听器，在监听器初始化时获取应用程序上下文并将它保存到上下文域中，程序启动时就会调用该方法
 
    ```java
-   package com.Huahua.listener;
-   
-   import org.springframework.context.ApplicationContext;
-   import org.springframework.context.support.ClassPathXmlApplicationContext;
-   
-   import javax.servlet.ServletContext;
-   import javax.servlet.ServletContextEvent;
-   import javax.servlet.ServletContextListener;
-   
-   public class ContextLoaderListener implements ServletContextListener {
-       @Override
-       public void contextInitialized(ServletContextEvent sce) {
-           //读取web.xml参数
-           String contextConfigLocation = sce.getServletContext().getInitParameter("contextConfig");
-           ApplicationContext app = new ClassPathXmlApplicationContext(contextConfigLocation);
-           //将Sring应用上下文存储到最大域当中
-           ServletContext servletContext = sce.getServletContext();
-           servletContext.setAttribute("app",app);
-           System.out.println("Spring容器以已经创建...");
-       }
-   
-       @Override
-       public void contextDestroyed(ServletContextEvent sce) {
-           ServletContextListener.super.contextDestroyed(sce);
-       }
+   package com.huahua.listener;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+
+public class ContextLoaderListener implements ServletContextListener {
+   @Override
+   public void contextInitialized(ServletContextEvent sce) {
+      //读取web.xml参数
+      String contextConfigLocation = sce.getServletContext().getInitParameter("contextConfig");
+      ApplicationContext app = new ClassPathXmlApplicationContext(contextConfigLocation);
+      //将Sring应用上下文存储到最大域当中
+      ServletContext servletContext = sce.getServletContext();
+      servletContext.setAttribute("app", app);
+      System.out.println("Spring容器以已经创建...");
    }
+
+   @Override
+   public void contextDestroyed(ServletContextEvent sce) {
+      ServletContextListener.super.contextDestroyed(sce);
+   }
+}
    ```
 
 3. 创建工具类以最低耦合度获取应用程序上下文
 
    ```java
-   package com.Huahua.listener;
+   package com.huahua.listener;
    
    import org.springframework.context.ApplicationContext;
    import javax.servlet.ServletContext;
@@ -1352,10 +1354,10 @@ public class SpringJunitTestCase {
 4. 在servlet中获取上下文
 
    ```java
-   package com.Huahua.web;
+   package com.huahua.web;
    
-   import com.Huahua.listener.WebApplicationContextUtils;
-   import com.Huahua.service.UserService;
+   import com.huahua.listener.WebApplicationContextUtils;
+   import com.huahua.service.UserService;
    import org.springframework.context.ApplicationContext;
    
    import javax.servlet.http.HttpServlet;
@@ -1405,7 +1407,7 @@ Spring自带的监听器名字叫做：ContextLoaderListener，
 
 <!--    配置监听器-->
     <listener>
-<!--        <listener-class>com.Huahua.listener.ContextLoaderListener</listener-class>-->
+<!--        <listener-class>com.huahua.listener.ContextLoaderListener</listener-class>-->
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
 ```
@@ -1413,9 +1415,9 @@ Spring自带的监听器名字叫做：ContextLoaderListener，
 5.3.3 Servlet中调用工具类方法
 
 ```java
-package com.Huahua.web;
+package com.huahua.web;
 
-import com.Huahua.service.UserService;
+import com.huahua.service.UserService;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -1424,12 +1426,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class UserServlet extends HttpServlet {
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
-        ApplicationContext app = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
-        UserService userService = app.getBean(UserService.class);
-        userService.save();
-    }
+   @Override
+   protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+      ApplicationContext app = WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+      UserService userService = app.getBean(UserService.class);
+      userService.save();
+   }
 }
 ```
 
@@ -1509,7 +1511,7 @@ M：Model、V：View、C：Controller
    ```
 
    ```java
-   package com.Huahua.controller;
+   package com.huahua.controller;
    
    import org.springframework.stereotype.Controller;
    import org.springframework.web.bind.annotation.RequestMapping;
@@ -1537,7 +1539,7 @@ M：Model、V：View、C：Controller
           xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
                        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
    <!--组件扫描-->
-       <context:component-scan base-package="com.Huahua.controller"></context:component-scan>
+       <context:component-scan base-package="com.huahua.controller"></context:component-scan>
    </beans>
    ```
 
@@ -1565,7 +1567,7 @@ M：Model、V：View、C：Controller
 ```java
 return "/page/success.jsp"  ==>   return "success";
 
-package com.Huahua.controller;
+package com.huahua.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -1893,20 +1895,20 @@ public List<String> save13(String[] strs) {
 创建POJO
 
 ```java
-package com.Huahua.domain;
+package com.huahua.domain;
 
 import java.util.List;
 
 public class VO {
-    private List<User> userList;
+   private List<User> userList;
 
-    public List<User> getUserList() {
-        return userList;
-    }
+   public List<User> getUserList() {
+      return userList;
+   }
 
-    public void setUserList(List<User> userList) {
-        this.userList = userList;
-    }
+   public void setUserList(List<User> userList) {
+      this.userList = userList;
+   }
 }
 ```
 
@@ -2116,7 +2118,7 @@ public String save17(@PathVariable("username") String username) {
    1. 定义转换器类实现Converter接口
 
       ```java
-      package com.Huahua.converter;
+      package com.huahua.converter;
       
       import org.springframework.core.convert.converter.Converter;
       
@@ -2147,7 +2149,7 @@ public String save17(@PathVariable("username") String username) {
           <bean id="myConversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
               <property name="converters">
                   <list>
-                      <bean class="com.Huahua.converter.DateConverter"/>
+                      <bean class="com.huahua.converter.DateConverter"/>
                   </list>
               </property>
           </bean>
@@ -2446,9 +2448,9 @@ public void save23(String username, MultipartFile[] uploadFile) throws IOExcepti
      ```
    
    - 创建数据库表和实体
-   
+
      ```java
-     package com.Huahua.domain;
+     package com.huahua.domain;
      
      public class Account {
          private String name;
@@ -2544,7 +2546,7 @@ public JdbcTemplate getJdbcTemplate(){
 
 ```xml
 <!--    配置组件扫描用于注解开发-->
-    <context:component-scan base-package="com.Huahua"></context:component-scan>
+<context:component-scan base-package="com.huahua"></context:component-scan>
 ```
 
 ```java
@@ -2572,12 +2574,12 @@ public class SpringConfiguration {
 1. 导入spring-jdbc和spring-tx包坐标
 2. 创建数据库和实体
 3. 创建Jdbc模版对象
-4. 执行数据库操作　　
+4. 执行数据库操作
 
 ```java
-package com.Huahua;
+package com.huahua;
 
-import com.Huahua.domain.Account;
+import com.huahua.domain.Account;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2592,35 +2594,35 @@ import java.util.List;
 @ContextConfiguration("classpath:applicationContext.xml")
 public class JdbcTemplateCRUDTest {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Test
-    public void testUpdate(){
-        jdbcTemplate.update("update account set money=? where name=?",1000,"tom");
-    }
+   @Autowired
+   private JdbcTemplate jdbcTemplate;
 
-    @Test
-    public void testDelete(){
-        jdbcTemplate.update("delete from account where money > ?",1000);
-    }
+   @Test
+   public void testUpdate() {
+      jdbcTemplate.update("update account set money=? where name=?", 1000, "tom");
+   }
+
+   @Test
+   public void testDelete() {
+      jdbcTemplate.update("delete from account where money > ?", 1000);
+   }
 
 
-
-    @Test
-    //查询
-    public void testQuery(){
-        //通过实体属性的行映射
-        BeanPropertyRowMapper<Account> rowMapper = new BeanPropertyRowMapper<Account>(Account.class);
-        //查询全部
-        List<Account> allAccount = jdbcTemplate.query("select * from account", rowMapper);
-        System.out.println(allAccount);
-        //查询一条
-        Account account = jdbcTemplate.queryForObject("select * from account where name=?", rowMapper, "tom");
-        System.out.println(account);
-        //查询总条数，简单类型指定方法即可
-        Long count = jdbcTemplate.queryForObject("select count(*) from account", Long.class);
-        System.out.println(count);
-    }
+   @Test
+   //查询
+   public void testQuery() {
+      //通过实体属性的行映射
+      BeanPropertyRowMapper<Account> rowMapper = new BeanPropertyRowMapper<Account>(Account.class);
+      //查询全部
+      List<Account> allAccount = jdbcTemplate.query("select * from account", rowMapper);
+      System.out.println(allAccount);
+      //查询一条
+      Account account = jdbcTemplate.queryForObject("select * from account where name=?", rowMapper, "tom");
+      System.out.println(account);
+      //查询总条数，简单类型指定方法即可
+      Long count = jdbcTemplate.queryForObject("select count(*) from account", Long.class);
+      System.out.println(count);
+   }
 
 }
 ```
@@ -2668,10 +2670,10 @@ SpringMVC拦截器类似于Servlet开发中的过滤器Filter，用于对处理�
 2. 配置拦截器
 3. 测试拦截器的拦截效果
 
-创建拦截器类实现HandlerInterceptor接口 
+创建拦截器类实现HandlerInterceptor接口
 
 ```java
-package com.Huahua.interceptor;
+package com.huahua.interceptor;
 
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -2682,32 +2684,32 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class MyInterceptor1 implements HandlerInterceptor {
-    //在目标方法执行之前 执行
-    @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws ServletException, IOException {
-        System.out.println("preHandle.....");
-        if ("yes".equals(request.getParameter("param"))){
-            return true;
-        }else {
-            request.getRequestDispatcher("/error.jsp").forward(request,response);
-            return false;
-        }
-    }
+   //在目标方法执行之前 执行
+   @Override
+   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws ServletException, IOException {
+      System.out.println("preHandle.....");
+      if ("yes".equals(request.getParameter("param"))) {
+         return true;
+      } else {
+         request.getRequestDispatcher("/error.jsp").forward(request, response);
+         return false;
+      }
+   }
 
-    //在目标方法执行之后 视图返回之前执行，可以获取Controller的视图模型，进一步加工
-    @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        modelAndView.addObject("name","byPostHandle");
-        System.out.println("postHandle...");
-        HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
-    }
+   //在目标方法执行之后 视图返回之前执行，可以获取Controller的视图模型，进一步加工
+   @Override
+   public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+      modelAndView.addObject("name", "byPostHandle");
+      System.out.println("postHandle...");
+      HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
+   }
 
-    //在整个流程都执行完毕之后做收尾工作
-    @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        System.out.println("afterCompletion...");
-        HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
-    }
+   //在整个流程都执行完毕之后做收尾工作
+   @Override
+   public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+      System.out.println("afterCompletion...");
+      HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+   }
 }
 ```
 
@@ -2715,36 +2717,36 @@ public class MyInterceptor1 implements HandlerInterceptor {
 
 ```xml
 <!--    配置拦截器-->
-    <mvc:interceptors>
-        <mvc:interceptor>
-            <mvc:mapping path="/**"/>
-            <bean class="com.Huahua.interceptor.MyInterceptor1"/>
-        </mvc:interceptor>
-    </mvc:interceptors>
+<mvc:interceptors>
+   <mvc:interceptor>
+      <mvc:mapping path="/**"/>
+      <bean class="com.huahua.interceptor.MyInterceptor1"/>
+   </mvc:interceptor>
+</mvc:interceptors>
 ```
 
 在核心配置类中配置拦截器：
 
 ```java
-package com.Huahua.config;
+package com.huahua.config;
 
-import com.Huahua.interceptor.MyInterceptor1;
+import com.huahua.interceptor.MyInterceptor1;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-public class InterceptorConfiguration implements WebMvcConfigurer{
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        WebMvcConfigurer.super.addInterceptors(registry);
-        HandlerInterceptor interceptor = new MyInterceptor1();
-        registry.addInterceptor(interceptor).addPathPatterns("/**").excludePathPatterns("/user/**");
-    }
+public class InterceptorConfiguration implements WebMvcConfigurer {
+   @Override
+   public void addInterceptors(InterceptorRegistry registry) {
+      WebMvcConfigurer.super.addInterceptors(registry);
+      HandlerInterceptor interceptor = new MyInterceptor1();
+      registry.addInterceptor(interceptor).addPathPatterns("/**").excludePathPatterns("/user/**");
+   }
 }
 ```
 
 ```java
-package com.Huahua.config;
+package com.huahua.config;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -2752,10 +2754,10 @@ import org.springframework.context.annotation.Import;
 
 //标志该类时Spring的核心配置类
 @Configuration
-//组件扫描    <context:component-scan base-package="com.Huahua"></context:component-scan>
-@ComponentScan("com.Huahua")
+//组件扫描    <context:component-scan base-package="com.huahua"></context:component-scan>
+@ComponentScan("com.huahua")
 //<import resource>
-@Import({DataSourceConfiguration.class,JdbcTemplateConfiguration.class,InterceptorConfiguration.class})
+@Import({DataSourceConfiguration.class, JdbcTemplateConfiguration.class, InterceptorConfiguration.class})
 public class SpringConfiguration {
 
 }
@@ -2764,7 +2766,7 @@ public class SpringConfiguration {
 测试用的控制器类：
 
 ```java
-package com.Huahua.controller;
+package com.huahua.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -2773,14 +2775,14 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class TargetController {
 
-    @RequestMapping("/target")
-    public ModelAndView show(){
-        System.out.println("目标资源执行。。。");
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("index1");
-        modelAndView.addObject("name","target");
-        return modelAndView;
-    }
+   @RequestMapping("/target")
+   public ModelAndView show() {
+      System.out.println("目标资源执行。。。");
+      ModelAndView modelAndView = new ModelAndView();
+      modelAndView.setViewName("index1");
+      modelAndView.addObject("name", "target");
+      return modelAndView;
+   }
 }
 ```
 
@@ -2912,31 +2914,31 @@ SpringMVC已经定义好了该类型转换器，在使用时可以根据项目�
 
 ```xml
 <!--    配置简单映射异常处理器-->
-    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
-<!--        <property name="defaultErrorView" value="excErr"/>-->
-        <property name="exceptionMappings">
-            <map>
-                <entry key="java.lang.ClassCastException" value="excErr-typeConversion"/>
-                <entry key="com.Huahua.exception.MyException" value="excErr-customize"/>
-            </map>
-        </property>
-    </bean>
+<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+   <!--        <property name="defaultErrorView" value="excErr"/>-->
+   <property name="exceptionMappings">
+      <map>
+         <entry key="java.lang.ClassCastException" value="excErr-typeConversion"/>
+         <entry key="com.huahua.exception.MyException" value="excErr-customize"/>
+      </map>
+   </property>
+</bean>
 ```
 
 可以配置一个通用的异常页面，将所有的异常都指向该页面，也可以做简单映射，让指定异常指向指定页面。
 
 ```java
-package com.Huahua.exception;
+package com.huahua.exception;
 
-public class MyException extends Exception{
+public class MyException extends Exception {
 }
 ```
 
 ```java
-package com.Huahua.service.Impl;
+package com.huahua.service.Impl;
 
-import com.Huahua.exception.MyException;
-import com.Huahua.service.ExceptionDemoService;
+import com.huahua.exception.MyException;
+import com.huahua.service.ExceptionDemoService;
 import org.springframework.stereotype.Service;
 
 import java.io.FileInputStream;
@@ -2945,47 +2947,47 @@ import java.io.InputStream;
 
 @Service
 public class ExceptionDemoServiceImpl implements ExceptionDemoService {
-    @Override
-    public void show1() {
-        System.out.println("抛出类型转换异常....");
-        Object str = "zhangsan";
-        Integer num = (Integer) str;
-    }
+   @Override
+   public void show1() {
+      System.out.println("抛出类型转换异常....");
+      Object str = "zhangsan";
+      Integer num = (Integer) str;
+   }
 
-    @Override
-    public void show2() {
-        System.out.println("抛出除零异常....");
-        int i = 1/0;
-    }
+   @Override
+   public void show2() {
+      System.out.println("抛出除零异常....");
+      int i = 1 / 0;
+   }
 
-    @Override
-    public void show3() throws FileNotFoundException {
-        System.out.println("文件找不到异常");
-        InputStream inputStream = new FileInputStream("/xx/XX/XX");
-    }
+   @Override
+   public void show3() throws FileNotFoundException {
+      System.out.println("文件找不到异常");
+      InputStream inputStream = new FileInputStream("/xx/XX/XX");
+   }
 
-    @Override
-    public void show4() {
-        System.out.println("空指针异常");
-        String str = null;
-        str.length();
-    }
+   @Override
+   public void show4() {
+      System.out.println("空指针异常");
+      String str = null;
+      str.length();
+   }
 
-    @Override
-    public void show5() throws MyException {
-        System.out.println("自定义异常");
-        throw new MyException();
-    }
+   @Override
+   public void show5() throws MyException {
+      System.out.println("自定义异常");
+      throw new MyException();
+   }
 }
 ```
 
 访问不太测试方法，返回不同视图
 
 ```java
-package com.Huahua.controller;
+package com.huahua.controller;
 
-import com.Huahua.exception.MyException;
-import com.Huahua.service.ExceptionDemoService;
+import com.huahua.exception.MyException;
+import com.huahua.service.ExceptionDemoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -2993,16 +2995,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class ExceptionDemoController {
 
-    @Autowired
-    ExceptionDemoService exceptionDemoService;
+   @Autowired
+   ExceptionDemoService exceptionDemoService;
 
-    @RequestMapping("/show")
-    public String show() throws MyException {
-        System.out.println("show running...");
+   @RequestMapping("/show")
+   public String show() throws MyException {
+      System.out.println("show running...");
 //        exceptionDemoService.show1();
-        exceptionDemoService.show5();
-        return "index";
-    }
+      exceptionDemoService.show5();
+      return "index";
+   }
 }
 ```
 
@@ -3024,9 +3026,9 @@ Show1
 4. 测试异常跳转
 
 ```java
-package com.Huahua.resolver;
+package com.huahua.resolver;
 
-import com.Huahua.exception.MyException;
+import com.huahua.exception.MyException;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -3034,29 +3036,29 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class MyExceptionResolver implements HandlerExceptionResolver {
-    /*
-    参数Exception：是异常对象
-    返回值ModelAndView：跳转到错误视图信息
-     */
-    @Override
-    public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        ModelAndView modelAndView = new ModelAndView();
-        if (ex instanceof MyException){
-            modelAndView.addObject("info","自定义异常");
-        }else if (ex instanceof ClassCastException){
-            modelAndView.addObject("info","类型转换异常");
-        }
-        modelAndView.setViewName("excErr");
-        return modelAndView;
-    }
+   /*
+   参数Exception：是异常对象
+   返回值ModelAndView：跳转到错误视图信息
+    */
+   @Override
+   public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+      ModelAndView modelAndView = new ModelAndView();
+      if (ex instanceof MyException) {
+         modelAndView.addObject("info", "自定义异常");
+      } else if (ex instanceof ClassCastException) {
+         modelAndView.addObject("info", "类型转换异常");
+      }
+      modelAndView.setViewName("excErr");
+      return modelAndView;
+   }
 }
 ```
 
 ```java
-package com.Huahua.controller;
+package com.huahua.controller;
 
-import com.Huahua.exception.MyException;
-import com.Huahua.service.ExceptionDemoService;
+import com.huahua.exception.MyException;
+import com.huahua.service.ExceptionDemoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -3064,28 +3066,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class ExceptionDemoController {
 
-    @Autowired
-    ExceptionDemoService exceptionDemoService;
+   @Autowired
+   ExceptionDemoService exceptionDemoService;
 
-    @RequestMapping("/show1")
-    public String show1() throws MyException {
-        System.out.println("show1 running...");
-        exceptionDemoService.show1();
-        return "index";
-    }
+   @RequestMapping("/show1")
+   public String show1() throws MyException {
+      System.out.println("show1 running...");
+      exceptionDemoService.show1();
+      return "index";
+   }
 
-    @RequestMapping("/show5")
-    public String show5() throws MyException {
-        System.out.println("show5 running...");
-        exceptionDemoService.show5();
-        return "index";
-    }
+   @RequestMapping("/show5")
+   public String show5() throws MyException {
+      System.out.println("show5 running...");
+      exceptionDemoService.show5();
+      return "index";
+   }
 }
 ```
 
 ```xml
 <!--    自定义异常处理器-->
-    <bean class="com.Huahua.resolver.MyExceptionResolver"/>
+<bean class="com.huahua.resolver.MyExceptionResolver"/>
 ```
 
 测试：
@@ -3124,7 +3126,7 @@ AOP 是 OOP 的延续，是软件开发中的一个热点，也是Spring框架�
    1. 目标类接口
 
       ```java
-      package com.Huahua.proxy.jdk;
+      package com.huahua.proxy.jdk;
       
       public interface TargetInterface {
           public void save();
@@ -3134,7 +3136,7 @@ AOP 是 OOP 的延续，是软件开发中的一个热点，也是Spring框架�
    2. 目标类
 
       ```java
-      package com.Huahua.proxy.jdk;
+      package com.huahua.proxy.jdk;
       
       public class Target implements TargetInterface{
           @Override
@@ -3147,7 +3149,7 @@ AOP 是 OOP 的延续，是软件开发中的一个热点，也是Spring框架�
    3. 增强类
 
       ```java
-      package com.Huahua.proxy.jdk;
+      package com.huahua.proxy.jdk;
       
       public class Advice {
           public void before(){
@@ -3162,7 +3164,7 @@ AOP 是 OOP 的延续，是软件开发中的一个热点，也是Spring框架�
    4. 动态代理对象
 
       ```java
-      package com.Huahua.proxy.jdk;
+      package com.huahua.proxy.jdk;
       import java.lang.reflect.InvocationHandler;
       import java.lang.reflect.Method;
       import java.lang.reflect.Proxy;
@@ -3212,7 +3214,7 @@ AOP 是 OOP 的延续，是软件开发中的一个热点，也是Spring框架�
    2. 目标类
 
       ```java
-      package com.Huahua.proxy.cglib;
+      package com.huahua.proxy.cglib;
       
       public class Target {
           public void save() {
@@ -3224,7 +3226,7 @@ AOP 是 OOP 的延续，是软件开发中的一个热点，也是Spring框架�
    3. 增强类
 
       ```java
-      package com.Huahua.proxy.cglib;
+      package com.huahua.proxy.cglib;
       
       public class Advice {
           public void before(){
@@ -3239,7 +3241,7 @@ AOP 是 OOP 的延续，是软件开发中的一个热点，也是Spring框架�
    4. 测试类
 
       ```java
-      package com.Huahua.proxy.cglib;
+      package com.huahua.proxy.cglib;
       
       import org.springframework.cglib.proxy.Enhancer;
       import org.springframework.cglib.proxy.MethodInterceptor;
@@ -3373,15 +3375,15 @@ Spring 框架监控切入点方法的执行。一旦监控到切入点方法被�
 
 2.  创建切面类
 
-   ```java
-   package com.Huahua.proxy.aop;
-   
-   public class MyAspect {
-       public void before(){
-           System.out.println("前置增强。。。。。。。。。");
-       }
-   }
-   ```
+```java
+package com.huahua.proxy.aop;
+
+public class MyAspect {
+    public void before(){
+        System.out.println("前置增强。。。。。。。。。");
+    }
+}
+```
 
 3. 创建目标对象
 
@@ -3391,15 +3393,15 @@ Spring 框架监控切入点方法的执行。一旦监控到切入点方法被�
 
    ```xml
    <!--    配置目标对象-->
-       <bean id="target" class="com.Huahua.proxy.aop.Target"/>
+       <bean id="target" class="com.huahua.proxy.aop.Target"/>
    <!--    切面对象-->
-       <bean id="myAspect" class="com.Huahua.proxy.aop.MyAspect"/>
+       <bean id="myAspect" class="com.huahua.proxy.aop.MyAspect"/>
    <!--    配置织入，告诉spring框架 哪些方法需要进行哪些增强(前置、后置。。。)-->
        <aop:config>
    <!--        声明切面-->
            <aop:aspect ref="myAspect">
    <!--            切面：切点+通知-->
-               <aop:before method="before" pointcut="execution(public void com.Huahua.proxy.aop.Target.save())"></aop:before>
+               <aop:before method="before" pointcut="execution(public void com.huahua.proxy.aop.Target.save())"></aop:before>
            </aop:aspect>
        </aop:config>
    ```
@@ -3407,9 +3409,9 @@ Spring 框架监控切入点方法的执行。一旦监控到切入点方法被�
 5. 测试类
 
    ```java
-   package com.Huahua;
+   package com.huahua;
    
-   import com.Huahua.proxy.aop.TargetInterface;
+   import com.huahua.proxy.aop.TargetInterface;
    import org.junit.Test;
    import org.junit.runner.RunWith;
    import org.springframework.beans.factory.annotation.Autowired;
@@ -3441,9 +3443,9 @@ Spring 框架监控切入点方法的执行。一旦监控到切入点方法被�
 
    ```xml
    <!--            切面：切点+通知-->
-   <aop:before method="before" pointcut="execution(public void com.Huahua.proxy.aop.Target.save())"/>
+   <aop:before method="before" pointcut="execution(public void com.huahua.proxy.aop.Target.save())"/>
     <!--该写法不由普遍性-->
-   <aop:before method="before" pointcut="execution(* com.Huahua.proxy.aop.*.*(..))"></aop:before>
+   <aop:before method="before" pointcut="execution(* com.huahua.proxy.aop.*.*(..))"></aop:before>
    <!--解释：不论是否为public，是否有返回值，aop包下任意类的任意方法不论有几个参数，都会被执行，不包含其子包-->
    ```
 
@@ -3489,69 +3491,76 @@ execution(* *..*.*(..))
 切面对象：
 
 ```java
-package com.Huahua.proxy.aop;
+package com.huahua.proxy.aop;
+
 import org.aspectj.lang.ProceedingJoinPoint;
+
 public class MyAspect {
-    public void before(){
-        System.out.println("前置增强(before)");
-    }
-    public void afterReturning(){
-        System.out.println("后置增强(after-returning)");
-    }
-    //参数：正在执行的连接点
-    public Object around(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        System.out.println("环绕前增强(around)");
-        Object proceed = proceedingJoinPoint.proceed();
-        System.out.println("环绕后增强(around)");
-        return proceed;
-    }
-    //异常抛出增强
-    public void afterThrowing(){
-        System.out.println("异常抛出增强(after-throwing)");
-    }
-    //最终增强
-    public void after(){
-        System.out.println("最终增强(after)");
-    }
+   public void before() {
+      System.out.println("前置增强(before)");
+   }
+
+   public void afterReturning() {
+      System.out.println("后置增强(after-returning)");
+   }
+
+   //参数：正在执行的连接点
+   public Object around(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+      System.out.println("环绕前增强(around)");
+      Object proceed = proceedingJoinPoint.proceed();
+      System.out.println("环绕后增强(around)");
+      return proceed;
+   }
+
+   //异常抛出增强
+   public void afterThrowing() {
+      System.out.println("异常抛出增强(after-throwing)");
+   }
+
+   //最终增强
+   public void after() {
+      System.out.println("最终增强(after)");
+   }
 }
 ```
 
 目标对象
 
 ```java
-package com.Huahua.proxy.aop;
+package com.huahua.proxy.aop;
 
 public class Target implements TargetInterface {
-    @Override
-    public void save() {
+   @Override
+   public void save() {
 //        int i = 1/0;
-        System.out.println("目标方法执行中。。。");
-    }
+      System.out.println("目标方法执行中。。。");
+   }
 }
 ```
 
 xml配置：
 
 ```xml
-    <aop:config>
-<!--        声明切面-->
-        <aop:aspect ref="myAspect">
-<!--            切面：切点+通知-->
-<aop:before method="before" pointcut="execution(* com.Huahua.proxy.aop.*.*(..))"></aop:before>
-<aop:after-returning method="afterReturning" pointcut="execution(* com.Huahua.proxy.aop.*.*(..))"/>
-<aop:around method="around" pointcut="execution(* com.Huahua.proxy.aop.*.*(..))"/>
-<aop:after-throwing method="afterThrowing" pointcut="execution(* com.Huahua.proxy.aop.*.*(..))"/>
-<aop:after method="after" pointcut="execution(* com.Huahua.proxy.aop.*.*(..))"/>
-        </aop:aspect>
-    </aop:config>
+
+<aop:config>
+   <!--        声明切面-->
+   <aop:aspect ref="myAspect">
+      <!--            切面：切点+通知-->
+      <aop:before method="before" pointcut="execution(* com.huahua.proxy.aop.*.*(..))"></aop:before>
+      <aop:after-returning method="afterReturning" pointcut="execution(* com.huahua.proxy.aop.*.*(..))"/>
+      <aop:around method="around" pointcut="execution(* com.huahua.proxy.aop.*.*(..))"/>
+      <aop:after-throwing method="afterThrowing" pointcut="execution(* com.huahua.proxy.aop.*.*(..))"/>
+      <aop:after method="after" pointcut="execution(* com.huahua.proxy.aop.*.*(..))"/>
+   </aop:aspect>
+</aop:config>
 ```
 
 测试类；
 
 ```java
-package com.Huahua;
+package com.huahua;
 
-import com.Huahua.proxy.aop.TargetInterface;
+import com.huahua.proxy.aop.TargetInterface;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -3561,12 +3570,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:applicationContext.xml")
 public class AopTest {
-    @Autowired
-    private TargetInterface targetInterface;
-    @Test
-    public void test1(){
-        targetInterface.save();
-    }
+   @Autowired
+   private TargetInterface targetInterface;
+
+   @Test
+   public void test1() {
+      targetInterface.save();
+   }
 }
 ```
 
@@ -3579,7 +3589,7 @@ public class AopTest {
 异常抛出增强(after-throwing)
 
 java.lang.ArithmeticException: / by zero
-at com.Huahua.proxy.aop.Target.save(Target.java:6)
+at com.huahua.proxy.aop.Target.save(Target.java:6)
 at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
 at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
 at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
@@ -3603,18 +3613,18 @@ at java.lang.reflect.Method.invoke(Method.java:498)
 
 ```xml
 <!--    配置织入，告诉spring框架 哪些方法需要进行哪些增强(前置、后置。。。)-->
-    <aop:config>
-        <aop:pointcut id="myPointcut" expression="execution(* com.Huahua.proxy.aop.*.*(..))"/>
-<!--        声明切面-->
-        <aop:aspect ref="myAspect">
-<!--            切面：切点+通知-->
-            <aop:before method="before" pointcut-ref="myPointcut"></aop:before>
-            <aop:after-returning method="afterReturning" pointcut-ref="myPointcut"/>
-            <aop:around method="around" pointcut-ref="myPointcut"/>
-            <aop:after-throwing method="afterThrowing" pointcut-ref="myPointcut"/>
-            <aop:after method="after" pointcut-ref="myPointcut"/>
-        </aop:aspect>
-    </aop:config>
+<aop:config>
+   <aop:pointcut id="myPointcut" expression="execution(* com.huahua.proxy.aop.*.*(..))"/>
+   <!--        声明切面-->
+   <aop:aspect ref="myAspect">
+      <!--            切面：切点+通知-->
+      <aop:before method="before" pointcut-ref="myPointcut"></aop:before>
+      <aop:after-returning method="afterReturning" pointcut-ref="myPointcut"/>
+      <aop:around method="around" pointcut-ref="myPointcut"/>
+      <aop:after-throwing method="afterThrowing" pointcut-ref="myPointcut"/>
+      <aop:after method="after" pointcut-ref="myPointcut"/>
+   </aop:aspect>
+</aop:config>
 ```
 
 ## 14.13 基于注解的AOP开发
@@ -3633,7 +3643,7 @@ at java.lang.reflect.Method.invoke(Method.java:498)
    1. 目标对象,注解名称不可与xml配置重复
 
       ```java
-      package com.Huahua.proxy.anno;
+      package com.huahua.proxy.anno;
       
       import org.springframework.stereotype.Component;
       
@@ -3642,7 +3652,7 @@ at java.lang.reflect.Method.invoke(Method.java:498)
           @Override
           public void save() {
       //        int i = 1/0;
-              System.out.println("目标方法执行中......\tby com.Huahua.proxy.anno.Target");
+              System.out.println("目标方法执行中......\tby com.huahua.proxy.anno.Target");
           }
       }
       ```
@@ -3650,7 +3660,7 @@ at java.lang.reflect.Method.invoke(Method.java:498)
    2. 切面类
 
       ```java
-      package com.Huahua.proxy.anno;
+      package com.huahua.proxy.anno;
       
       import org.aspectj.lang.ProceedingJoinPoint;
       import org.aspectj.lang.annotation.*;
@@ -3660,14 +3670,14 @@ at java.lang.reflect.Method.invoke(Method.java:498)
       @Aspect  //标注为切面类
       public class MyAspect {
       
-          @Pointcut("execution(* com.Huahua.proxy.anno.*.*(..))")
+          @Pointcut("execution(* com.huahua.proxy.anno.*.*(..))")
           public void Pointcut(){}
       
           @Before("Pointcut()")
           public void before(){
               System.out.println("前置增强(before)");
           }
-          @AfterReturning(value = "execution(* com.Huahua.proxy.anno.*.*(..))")
+          @AfterReturning(value = "execution(* com.huahua.proxy.anno.*.*(..))")
           public void afterReturning(){
               System.out.println("后置增强(after-returning)");
           }
@@ -3698,7 +3708,7 @@ at java.lang.reflect.Method.invoke(Method.java:498)
 
       ```xml
       <!--    配置组件扫描,用于注解开发-->
-      <context:component-scan base-package="com.Huahua"></context:component-scan>
+      <context:component-scan base-package="com.huahua"></context:component-scan>
       <!--    自动代理-->
       <aop:aspectj-autoproxy/>
       ```
@@ -3706,9 +3716,9 @@ at java.lang.reflect.Method.invoke(Method.java:498)
    4. 测试类
 
       ```java
-      package com.Huahua;
+      package com.huahua;
       
-      import com.Huahua.proxy.anno.TargetInterface;
+      import com.huahua.proxy.anno.TargetInterface;
       import org.junit.Test;
       import org.junit.runner.RunWith;
       import org.springframework.beans.factory.annotation.Autowired;
@@ -3734,7 +3744,7 @@ at java.lang.reflect.Method.invoke(Method.java:498)
       ```apl
       环绕前增强(around)
       前置增强(before)
-      目标方法执行中......	by com.Huahua.proxy.anno.Target
+      目标方法执行中......	by com.huahua.proxy.anno.Target
       后置增强(after-returning)
       最终增强(after)
       环绕后增强(around)
@@ -3745,7 +3755,7 @@ at java.lang.reflect.Method.invoke(Method.java:498)
 3. 抽取切点表达式
 
    ```java
-   @Pointcut("execution(* com.Huahua.proxy.anno.*.*(..))") //抽取
+   @Pointcut("execution(* com.huahua.proxy.anno.*.*(..))") //抽取
    public void Pointcut(){}
    @Before("Pointcut()") //引用
    public void before(){
@@ -5980,3 +5990,286 @@ User(id=318, username=hahah, password=asdf, birthday=Mon Jul 25 15:56:07 CST 202
 # 22、SSM框架整合
 
 ## 1、准备工作
+
+### 1.1 导入依赖
+
+```xml
+<dependencies>
+<!--        servelet,jsp-->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>4.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>javax.servlet.jsp-api</artifactId>
+            <version>2.2.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jstl</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
+        </dependency>
+
+<!--        junit-->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+
+<!--        AOP-->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.8.7</version>
+        </dependency>
+<!--     数据库   -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.22</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.5.9</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>2.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>c3p0</groupId>
+            <artifactId>c3p0</artifactId>
+            <version>0.9.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.1.10</version>
+        </dependency>
+
+<!--上传文件-->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+
+<!--     日志   -->
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+
+<!--        -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+        </dependency>
+
+<!--        分页-->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper</artifactId>
+            <version>3.7.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.jsqlparser</groupId>
+            <artifactId>jsqlparser</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+
+<!--        spring-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>5.3.18</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>5.3.18</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>5.3.18</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>5.3.18</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>5.3.18</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>5.3.18</version>
+        </dependency>
+
+<!--        json数据封装-->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+    </dependencies>
+```
+
+### 1.2 构建框架
+
+![截屏2022-07-26 09.58.23](/Users/kuroyume/Spring/Spring_Learning_note/note/截屏2022-07-26 09.58.23.png)
+
+### 1.3 原始方式整合
+
+其他基础代码使用Spring自动注入，业务层使用原始方法构建mybatis的会话工厂
+
+```java
+package com.huahua.service.Impl;
+
+import com.huahua.domain.Account;
+import com.huahua.mapper.AccountMapper;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+@Service
+public class AccountService implements com.huahua.service.AccountService {
+
+
+    @Override
+    public void save(Account account) {
+        try {
+            InputStream resourceAsStream = Resources.getResourceAsStream("sqlMapConfig.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
+            SqlSession sqlSession = sqlSessionFactory.openSession();
+            AccountMapper mapper = sqlSession.getMapper(AccountMapper.class);
+            mapper.save(account);
+            sqlSession.commit();
+            sqlSession.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public List<Account> findAll() {
+        try {
+            InputStream resourceAsStream = Resources.getResourceAsStream("sqlMapConfig.xml");
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(resourceAsStream);
+            SqlSession sqlSession = sqlSessionFactory.openSession();
+            AccountMapper mapper = sqlSession.getMapper(AccountMapper.class);
+            List<Account> all = mapper.findAll();
+            sqlSession.commit();
+            sqlSession.close();
+            return all;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+```
+
+## 2、整合思路
+
+将Session工厂交给Spring容器管理，从容器中获得执行操作的Mapper实例
+
+applicationContext.xml
+
+```xml
+<!--    加载properties文件-->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+<!--    配置数据源-->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driver}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+<!--    配置会话工厂sessionFactory-->
+    <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+<!--        注入datasource-->
+        <property name="dataSource" ref="dataSource"/>
+<!--        加载MyBatis的核心文件-->
+        <property name="configLocation" value="sqlMapConfig-spring.xml"/>
+    </bean>
+    <!--    加载mapper.xml映射文件,自动生成mapper对应的bean可装配使用-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage"  value="com.huahua.mapper"/>
+    </bean>
+```
+
+sqlMapConfig.xml
+
+```xml
+<configuration>
+    <!--配置别名-->
+    <typeAliases>
+<!--        <typeAlias type="com.huahua.domain.Account" alias="user"/>-->
+<!--        扫描包，统一指配默认别名一-->
+        <package name="com.huahua.domain"/>
+    </typeAliases>
+
+    <!--    配置PageHelper插件-->
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageHelper">
+            <!--            指定方言-->
+            <property name="dialect" value="mysql"/>
+        </plugin>
+    </plugins>
+</configuration>
+```
+
+将事务的控制交给SpringAOP，进行申明式事物控制

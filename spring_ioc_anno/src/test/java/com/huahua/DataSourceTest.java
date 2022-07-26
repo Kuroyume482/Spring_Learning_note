@@ -1,4 +1,4 @@
-package com.Huahua;
+package com.huahua;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidPooledConnection;

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+
+<configuration>
+    <!--配置别名-->
+    <typeAliases>
+<!--        <typeAlias type="com.huahua.domain.Account" alias="user"/>-->
+<!--        扫描包，统一指配默认别名一-->
+        <package name="com.huahua.domain"/>
+    </typeAliases>
+
+    <!--    配置PageHelper插件-->
+<!--    <plugins>-->
+<!--        <plugin interceptor="com.github.pagehelper.PageHelper">-->
+<!--            &lt;!&ndash;            指定方言&ndash;&gt;-->
+<!--            <property name="dialect" value="mysql"/>-->
+<!--        </plugin>-->
+<!--    </plugins>-->
+</configuration>
